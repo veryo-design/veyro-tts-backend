@@ -6,17 +6,22 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 
-const PORT = process.env.PORT || 3000;
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 
-// Default ElevenLabs voice.
-// We'll make this selectable from your VEYRO UI later.
 const DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
 
 app.get("/", (req, res) => {
   res.json({
     status: "online",
     service: "VEYRO Text-to-Speech",
+    endpoint: "/tts"
+  });
+});
+
+app.get("/tts", (req, res) => {
+  res.json({
+    status: "online",
+    message: "VEYRO TTS endpoint is ready."
   });
 });
 
@@ -32,17 +37,11 @@ app.post("/tts", async (req, res) => {
       text,
       voice_id = DEFAULT_VOICE_ID,
       speed = 1
-    } = req.body;
+    } = req.body || {};
 
     if (!text || !text.trim()) {
       return res.status(400).json({
         error: "Text is required."
-      });
-    }
-
-    if (text.length > 5000) {
-      return res.status(400).json({
-        error: "Text is too long. Maximum 5000 characters."
       });
     }
 
@@ -64,40 +63,43 @@ app.post("/tts", async (req, res) => {
             style: 0,
             use_speaker_boost: true
           },
-          speed: Math.max(0.7, Math.min(1.2, Number(speed) || 1))
+          speed: Math.max(
+            0.7,
+            Math.min(1.2, Number(speed) || 1)
+          )
         })
       }
     );
 
     if (!response.ok) {
-      const errorText = await response.text();
-
-      console.error("ElevenLabs error:", errorText);
+      const error = await response.text();
+      console.error("ElevenLabs:", error);
 
       return res.status(response.status).json({
         error: "ElevenLabs could not generate the voice."
       });
     }
 
-    const audioBuffer = Buffer.from(await response.arrayBuffer());
+    const audioBuffer = Buffer.from(
+      await response.arrayBuffer()
+    );
 
     res.set({
       "Content-Type": "audio/mpeg",
-      "Content-Length": audioBuffer.length,
+      "Content-Length": String(audioBuffer.length),
       "Cache-Control": "no-store"
     });
 
-    res.send(audioBuffer);
+    return res.send(audioBuffer);
 
   } catch (error) {
-    console.error("TTS error:", error);
+    console.error("VEYRO TTS error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       error: "Something went wrong while generating the voice."
     });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`VEYRO TTS backend running on port ${PORT}`);
-});
+export default app;
+    
