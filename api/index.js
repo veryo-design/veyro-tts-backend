@@ -102,4 +102,9 @@ app.post("/tts", async (req, res) => {
   }
 });
 
-export default app;
+// Start VEYRO TTS server
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`VEYRO TTS running on port ${PORT}`);
+});
