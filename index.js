@@ -9,7 +9,7 @@ app.use(express.json({ limit: "1mb" }));
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 
 // New VEYRO default voice
-const DEFAULT_VOICE_ID = "NOpBlnGInO9m6vDvFkFC";
+const DEFAULT_VOICE_ID = "C1npRmjB19a6yNkEucvx";
 
 app.get("/", (req, res) => {
   res.json({
