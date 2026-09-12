@@ -8,14 +8,13 @@ app.use(express.json({ limit: "1mb" }));
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 
-// VEYRO Voice — Lil Mousekins
-const DEFAULT_VOICE_ID = "dyYgiC1urE7I6d379Vo2";
+// VEYRO Voice default voice
+const DEFAULT_VOICE_ID = "8pjgnN0NZUWKcHbb5SrY";
 
 app.get("/", (req, res) => {
   res.json({
     status: "online",
     service: "VEYRO Text-to-Speech",
-    voice: "Lil Mousekins",
     endpoint: "/tts"
   });
 });
@@ -24,7 +23,7 @@ app.get("/tts", (req, res) => {
   res.json({
     status: "online",
     service: "VEYRO Text-to-Speech",
-    voice: "Lil Mousekins",
+    voice: "VEYRO Default Voice",
     message: "VEYRO TTS endpoint is ready."
   });
 });
@@ -39,7 +38,7 @@ app.post("/tts", async (req, res) => {
 
     const {
       text,
-      voice_id = DEFAULT_VOICE_ID,
+      voice_id,
       speed = 1
     } = req.body || {};
 
@@ -57,7 +56,7 @@ app.post("/tts", async (req, res) => {
       Math.min(1.2, Number(speed) || 1)
     );
 
-    console.log("Generating VEYRO voice...");
+    console.log("VEYRO TTS request");
     console.log("Voice:", selectedVoice);
     console.log("Speed:", selectedSpeed);
 
