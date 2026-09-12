@@ -8,7 +8,8 @@ app.use(express.json({ limit: "1mb" }));
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 
-const DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
+// New VEYRO default voice
+const DEFAULT_VOICE_ID = "NOpBlnGInO9m6vDvFkFC";
 
 app.get("/", (req, res) => {
   res.json({
@@ -56,7 +57,7 @@ app.post("/tts", async (req, res) => {
         },
         body: JSON.stringify({
           text: text.trim(),
-          model_id: "eleven_multilingual_v2",
+          model_id: "eleven_v3",
           voice_settings: {
             stability: 0.5,
             similarity_boost: 0.75,
