@@ -29,7 +29,7 @@ app.post("/tts", async (req, res) => {
   try {
     if (!ELEVENLABS_API_KEY) {
       return res.status(500).json({
-        error: "ElevenLabs API key is not configured."
+        error: "ELEVENLABS_API_KEY is missing from Vercel."
       });
     }
 
@@ -72,11 +72,16 @@ app.post("/tts", async (req, res) => {
     );
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error("ElevenLabs:", error);
+      const errorText = await response.text();
+
+      console.error(
+        "ElevenLabs HTTP",
+        response.status,
+        errorText
+      );
 
       return res.status(response.status).json({
-        error: "ElevenLabs could not generate the voice."
+        error: `ElevenLabs error (${response.status}): ${errorText}`
       });
     }
 
@@ -96,10 +101,9 @@ app.post("/tts", async (req, res) => {
     console.error("VEYRO TTS error:", error);
 
     return res.status(500).json({
-      error: "Something went wrong while generating the voice."
+      error: error.message || "TTS server error."
     });
   }
 });
 
 export default app;
-    
