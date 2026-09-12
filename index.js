@@ -8,13 +8,14 @@ app.use(express.json({ limit: "1mb" }));
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 
-// New VEYRO default voice
-const DEFAULT_VOICE_ID = "C1npRmjB19a6yNkEucvx";
+// VEYRO Voice — Lil Mousekins
+const DEFAULT_VOICE_ID = "dyYgiC1urE7I6d379Vo2";
 
 app.get("/", (req, res) => {
   res.json({
     status: "online",
     service: "VEYRO Text-to-Speech",
+    voice: "Lil Mousekins",
     endpoint: "/tts"
   });
 });
@@ -22,6 +23,8 @@ app.get("/", (req, res) => {
 app.get("/tts", (req, res) => {
   res.json({
     status: "online",
+    service: "VEYRO Text-to-Speech",
+    voice: "Lil Mousekins",
     message: "VEYRO TTS endpoint is ready."
   });
 });
@@ -46,28 +49,42 @@ app.post("/tts", async (req, res) => {
       });
     }
 
+    const selectedVoice =
+      voice_id || DEFAULT_VOICE_ID;
+
+    const selectedSpeed = Math.max(
+      0.7,
+      Math.min(1.2, Number(speed) || 1)
+    );
+
+    console.log("Generating VEYRO voice...");
+    console.log("Voice:", selectedVoice);
+    console.log("Speed:", selectedSpeed);
+
     const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voice_id}`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoice}`,
       {
         method: "POST",
+
         headers: {
           "xi-api-key": ELEVENLABS_API_KEY,
           "Content-Type": "application/json",
           "Accept": "audio/mpeg"
         },
+
         body: JSON.stringify({
           text: text.trim(),
+
           model_id: "eleven_v3",
+
           voice_settings: {
             stability: 0.5,
             similarity_boost: 0.75,
             style: 0,
             use_speaker_boost: true
           },
-          speed: Math.max(
-            0.7,
-            Math.min(1.2, Number(speed) || 1)
-          )
+
+          speed: selectedSpeed
         })
       }
     );
@@ -76,13 +93,18 @@ app.post("/tts", async (req, res) => {
       const errorText = await response.text();
 
       console.error(
-        "ElevenLabs HTTP",
-        response.status,
+        "ElevenLabs HTTP:",
+        response.status
+      );
+
+      console.error(
+        "ElevenLabs response:",
         errorText
       );
 
       return res.status(response.status).json({
-        error: `ElevenLabs error (${response.status}): ${errorText}`
+        error:
+          `ElevenLabs error (${response.status}): ${errorText}`
       });
     }
 
@@ -99,10 +121,15 @@ app.post("/tts", async (req, res) => {
     return res.send(audioBuffer);
 
   } catch (error) {
-    console.error("VEYRO TTS error:", error);
+    console.error(
+      "VEYRO TTS error:",
+      error
+    );
 
     return res.status(500).json({
-      error: error.message || "TTS server error."
+      error:
+        error.message ||
+        "VEYRO TTS server error."
     });
   }
 });
